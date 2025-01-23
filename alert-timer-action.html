@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alert Management Timer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+
+    .alert-panel {
+      width: 350px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .resolve-button, .action-button, .cancel-button {
+      width: 100%;
+      background-color: #28a745;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      font-size: 1.2em;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+
+    .cancel-button {
+      background-color: #dc3545;
+    }
+
+    .timer-display {
+      margin-top: 20px;
+      text-align: center;
+      padding: 10px;
+      font-size: 1.5em;
+      font-weight: bold;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .timer-display.green {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .timer-display.yellow {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+
+    .timer-display.red {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+
+    .log-action {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .log-action textarea {
+      width: 100%;
+      height: 80px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1em;
+    }
+
+    .log-action button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="alert-panel">
+    <button class="resolve-button" onclick="resolveAlert()">Resolve Alert</button>
+    <button class="action-button" onclick="initiateCall()">Call Emergency Contact</button>
+    <div id="timer" class="timer-display green">Timer Not Set</div>
+    <button class="cancel-button" onclick="cancelTimer()">Cancel Timer</button>
+
+    <div class="log-action">
+      <textarea id="actionLog" placeholder="Document the outcome of your action here..."></textarea>
+      <button onclick="logActionAndSetTimer()">Set Timer After Logging</button>
+    </div>
+  </div>
+
+  <script>
+    let timeLeft = 0; // Timer in seconds
+    let timerInterval = null;
+    const timerElement = document.getElementById("timer");
+
+    // Update Timer Display
+    function updateTimerDisplay() {
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      timerElement.textContent = `Time Remaining: ${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+
+      // Update timer color
+      if (timeLeft > 60) {
+        timerElement.className = "timer-display green";
+      } else if (timeLeft > 0) {
+        timerElement.className = "timer-display yellow";
+      } else {
+        timerElement.className = "timer-display red";
+        timerElement.textContent = "Time's Up!";
+        clearInterval(timerInterval);
+        alert("Timer has expired! Take necessary action.");
+      }
+    }
+
+    // Start Timer
+    function startTimer() {
+      if (timerInterval) clearInterval(timerInterval); // Clear any existing timer
+      timerInterval = setInterval(() => {
+        if (timeLeft > 0) {
+          timeLeft--;
+          updateTimerDisplay();
+        }
+      }, 1000);
+    }
+
+    // Set Timer
+    function setTimer(minutes) {
+      timeLeft = minutes * 60;
+      updateTimerDisplay();
+      startTimer();
+    }
+
+    // Cancel Timer
+    function cancelTimer() {
+      clearInterval(timerInterval);
+      timeLeft = 0;
+      timerElement.textContent = "Timer Canceled";
+      timerElement.className = "timer-display green";
+    }
+
+    // Log Action and Set Timer
+    function logActionAndSetTimer() {
+      const actionLog = document.getElementById("actionLog").value;
+      if (!actionLog.trim()) {
+        alert("Please document the outcome before setting the timer.");
+        return;
+      }
+      setTimer(30); // Default 30 minutes
+      alert("Action logged and timer set for 30 minutes.");
+    }
+
+    // Call Emergency Contact
+    function initiateCall() {
+      alert("Calling Emergency Contact...");
+    }
+
+    // Resolve Alert
+    function resolveAlert() {
+      alert("Alert Resolved!");
+      cancelTimer(); // Stop the timer
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Dispatch Readiness with Protocol</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .protocol-step {
+      margin-bottom: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .notification {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .info {
+      background-color: #d9edf7;
+      color: #31708f;
+    }
+    .error {
+      background-color: #f2dede;
+      color: #a94442;
+    }
+    .success {
+      background-color: #dff0d8;
+      color: #3c763d;
+    }
+  </style>
+</head>
+<body>
+  <h1>Dynamic Dispatch Readiness with Protocol</h1>
+
+  <!-- Protocol Steps will be dynamically populated -->
+  <div id="protocol-steps"></div>
+
+  <script>
+    // Sample Protocol Definition
+    const sampleProtocol = [
+      { step: 1, action: "Call device" },
+      { step: 2, action: "Send text to device and wait 2 minutes" },
+      { step: 3, action: "Call phone number assigned to device user" },
+      { step: 4, action: "Call emergency contacts" },
+      { step: 5, action: "Call dispatch (if all conditions are met)" },
+    ];
+
+    // Dispatch Step
+    const dispatchStep = 5; // Define which step is the dispatch step
+
+    // Function to dynamically render protocol steps
+    const renderProtocolSteps = () => {
+      const container = document.getElementById("protocol-steps");
+      sampleProtocol.forEach((step) => {
+        const stepDiv = document.createElement("div");
+        stepDiv.className = "protocol-step";
+        stepDiv.id = `step-${step.step}`;
+        stepDiv.innerHTML = `
+          <h3>Step ${step.step}: ${step.action}</h3>
+          <div id="notification-step-${step.step}"></div>
+        `;
+        container.appendChild(stepDiv);
+      });
+    };
+
+    // Function to display notifications dynamically for any step
+    const displayNotification = (stepId, type, message) => {
+      const notificationArea = document.getElementById(`notification-step-${stepId}`);
+      if (notificationArea) {
+        const notification = document.createElement("div");
+        notification.className = `notification ${type}`;
+        notification.innerText = message;
+
+        notificationArea.innerHTML = ""; // Clear existing notifications
+        notificationArea.appendChild(notification);
+      }
+    };
+
+    // Function to check dispatch readiness
+    const checkDispatchReadiness = (
+      alertAge,
+      deviceStatus,
+      userSpeed,
+      lastLocationUpdate,
+      isProtocolOverride,
+      currentStep
+    ) => {
+      const readinessStatus = {
+        isReady: false,
+        unmetConditions: [],
+      };
+
+      const timestamp = new Date().toLocaleTimeString("en-US", { timeZone: "MST" });
+
+      // Trigger readiness check only if current step matches dispatch step
+      if (currentStep !== dispatchStep) {
+        console.log(`${timestamp}: Current step ${currentStep} is not the dispatch step. No readiness check.`);
+        return readinessStatus;
+      }
+
+      // Case 3: Mandatory Dispatch (Protocol Override)
+      if (isProtocolOverride) {
+        displayNotification(
+          currentStep,
+          "success",
+          "Mandatory Dispatch: Protocol mandates dispatch regardless of conditions."
+        );
+        console.log(`${timestamp}: Dispatch override triggered at Step ${currentStep}. Dispatch is being made.`);
+        readinessStatus.isReady = true;
+        return readinessStatus;
+      }
+
+      // Validate Alert Age
+      if (alertAge > 24) {
+        readinessStatus.unmetConditions.push("alert is older than 24 hours");
+      }
+
+      // Validate Device Online Status
+      if (deviceStatus !== "online") {
+        readinessStatus.unmetConditions.push("device is offline");
+      }
+
+      // Validate User Speed
+      if (userSpeed > 5) {
+        readinessStatus.unmetConditions.push("user is moving faster than 5 km/h");
+      }
+
+      // Validate Last Location Update
+      if (lastLocationUpdate > 5) {
+        readinessStatus.unmetConditions.push("a valid and up-to-date location is not available");
+      }
+
+      // Case 1: Dispatch if all conditions are met
+      if (readinessStatus.unmetConditions.length === 0) {
+        readinessStatus.isReady = true;
+        displayNotification(
+          currentStep,
+          "success",
+          `All readiness conditions are met at Step ${currentStep}. Dispatching emergency services.`
+        );
+        console.log(`${timestamp}: Dispatch readiness validated at Step ${currentStep}. Dispatch is being made.`);
+      } 
+      // Case 2: No Dispatch if conditions are unmet
+      else {
+        const logEntry = `${timestamp}: Step ${currentStep} failed. Unmet conditions: ${readinessStatus.unmetConditions.join(", ")}`;
+        console.warn(logEntry);
+        displayNotification(
+          currentStep,
+          "error",
+          `Dispatch readiness failed at Step ${currentStep}: ${readinessStatus.unmetConditions.join(", ")}`
+        );
+      }
+
+      return readinessStatus;
+    };
+
+    // Render Protocol Steps
+    renderProtocolSteps();
+
+    // Simulate steps and trigger readiness checks dynamically
+    sampleProtocol.forEach((step) => {
+      checkDispatchReadiness(
+        12, // Alert age in hours
+        "online", // Device status
+        2, // User speed in km/h
+        3, // Last location update in minutes
+        false, // Protocol override flag
+        step.step // Current step
+      );
+    });
+  </script>
+</body>
+</html>

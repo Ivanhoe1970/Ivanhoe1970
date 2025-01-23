@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protocol Workflow</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #log-container, #steps-container {
+            width: 48%;
+            background: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .log-entry {
+            margin-bottom: 10px;
+            padding: 5px;
+            background: #eef;
+            border-left: 5px solid #007bff;
+            border-radius: 4px;
+        }
+
+        .step {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 2px solid #ccc;
+        }
+
+        .completed-step {
+            background: #d4edda;
+            border-color: #28a745;
+            position: relative;
+        }
+
+        .completed-step:after {
+            content: "✔";
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            font-size: 18px;
+            color: #28a745;
+        }
+
+        .step-button {
+            margin-top: 10px;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: #fff;
+            background: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .step-button:hover {
+            background: #0056b3;
+        }
+
+        textarea {
+            width: 100%;
+            height: 50px;
+            margin-top: 10px;
+            padding: 5px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: none;
+        }
+
+        .post-note-button {
+            margin-top: 10px;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: #fff;
+            background: #28a745;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .post-note-button:hover {
+            background: #218838;
+        }
+
+        .continue-protocol-button {
+            margin-top: 15px;
+            padding: 10px 15px;
+            font-size: 16px;
+            color: #fff;
+            background: #ffc107;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .continue-protocol-button:hover {
+            background: #e0a800;
+        }
+
+        .resolve-container {
+            margin-top: 20px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        button.resolve-button {
+            margin-top: 10px;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: #fff;
+            background: #dc3545;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button.resolve-button:hover {
+            background: #c82333;
+        }
+
+        .locked {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <h1>Protocol Workflow</h1>
+    <div class="container">
+        <div id="log-container">
+            <h2>Logs</h2>
+            <div id="log-list"></div>
+        </div>
+        <div id="steps-container">
+            <h2>Steps</h2>
+            <!-- Step 1 -->
+            <div id="step-1" class="step">
+                <span>Step 1: Send a message to the device, </span>
+                <button class="step-button" onclick="handleStep1()">Send Message</button>
+                <textarea id="step-1-note" placeholder="Document the result of this step..."></textarea>
+                <button class="post-note-button" onclick="postNote(1)">Post Note</button>
+            </div>
+            <!-- Step 2a -->
+            <div id="step-2a" class="step">
+                <span>Step 2a: Call the device user</span>
+                <button class="step-button" onclick="handleStep2a()">Call Device User</button>
+                <textarea id="step-2a-note" placeholder="Document the result of this step..."></textarea>
+                <button class="post-note-button" onclick="postNote('2a')">Post Note</button>
+            </div>
+            <!-- Step 2b -->
+            <div id="step-2b" class="step">
+                <span>Step 2b: Call the user's phone number</span>
+                <button class="step-button" onclick="handleStep2b()">Call Phone Number</button>
+                <textarea id="step-2b-note" placeholder="Document the result of this step..."></textarea>
+                <button class="post-note-button" onclick="postNote('2b')">Post Note</button>
+            </div>
+            <!-- Step 3 -->
+            <div id="step-3" class="step">
+                <span>Step 3: Call Emergency Services</span>
+                <button class="step-button" onclick="handleStep3()">Dispatch EMS</button>
+                <button class="step-button" onclick="skipDispatch()">Skip Dispatch</button>
+                <textarea id="step-3-note" placeholder="Document the details of EMS dispatch..."></textarea>
+                <button class="post-note-button" onclick="postNote(3)">Post Note</button>
+            </div>
+            <!-- Step 4 -->
+            <div id="step-4" class="step">
+                <span>Step 4: Contact Emergency Contacts</span>
+                <div id="step-4-1" class="step">
+                    <span>Step 4.1: Call Taylor Davis at +1-780-311-5279</span>
+                    <button class="step-button" onclick="handleContact('Taylor Davis', '+1-780-311-5279')">Call Taylor Davis</button>
+                    <textarea id="step-4-1-note" placeholder="Document the result of this call..."></textarea>
+                    <button class="post-note-button" onclick="postNote('4-1')">Post Note</button>
+                </div>
+                <div id="step-4-2" class="step">
+                    <span>Step 4.2: Call Jamie Davis at +1-905-829-5863</span>
+                    <button class="step-button" onclick="handleContact('Jamie Davis', '+1-905-829-5863')">Call Jamie Davis</button>
+                    <textarea id="step-4-2-note" placeholder="Document the result of this call..."></textarea>
+                    <button class="post-note-button" onclick="postNote('4-2')">Post Note</button>
+                </div>
+                <button class="continue-protocol-button" onclick="continueProtocol()">Continue Protocol</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="resolve-container">
+        <h3>Resolution</h3>
+        <select id="resolution-reason">
+            <option value="False alert without dispatch">False alert without dispatch</option>
+            <option value="False alert with dispatch">False alert with dispatch</option>
+            <option value="Incident with dispatch">Incident with dispatch</option>
+            <option value="Other">Other</option>
+        </select>
+        <button class="resolve-button" onclick="resolveAlert()">Resolve Alert</button>
+    </div>
+
+    <script>
+        let specialistId = "Op 417";
+        let alertResolved = false;
+
+        function logAction(message, result = "") {
+            const timestamp = new Date().toLocaleTimeString("en-US", { timeZone: "MST", hour12: false });
+            const fullMessage = result ? `[${timestamp}] ${message}. ${result} | ${specialistId}` : `[${timestamp}] ${message} | ${specialistId}`;
+            const logContainer = document.getElementById("log-list");
+            const logDiv = document.createElement("div");
+            logDiv.className = "log-entry";
+            logDiv.textContent = fullMessage;
+            logContainer.appendChild(logDiv);
+        }
+
+        function handleStep1() {
+            if (!alertResolved) logAction("Sent message to the device: 'Do you need help? '");
+        }
+
+        function handleStep2a() {
+            if (!alertResolved) logAction("Called the device user");
+        }
+
+        function handleStep2b() {
+            if (!alertResolved) logAction("Called the user's phone number");
+        }
+
+        function handleStep3() {
+            if (!alertResolved) logAction("Dispatched EMS");
+        }
+
+        function skipDispatch() {
+            if (!alertResolved) {
+                logAction("Step 3: Dispatch skipped due to unmet conditions");
+                const note = document.getElementById("step-3-note").value.trim();
+                if (note) {
+                    logAction("Step 3: Device offline.", note);
+                    document.getElementById("step-3-note").value = "";
+                } else {
+                    alert("Please enter a resolution note.");
+                }
+            }
+        }
+
+        function handleContact(name, phone) {
+            if (!alertResolved) logAction(`Called ${name} at ${phone}`);
+        }
+
+        function postNote(step) {
+            if (!alertResolved) {
+                const note = document.getElementById(`step-${step}-note`).value.trim();
+                if (note) {
+                    const stepElement = document.getElementById(`step-${step}`);
+                    logAction(stepElement.querySelector("span").textContent, note);
+                    document.getElementById(`step-${step}-note`).value = "";
+                    stepElement.classList.add("completed-step");
+                } else {
+                    alert("Please enter a note before posting.");
+                }
+            }
+        }
+
+        function continueProtocol() {
+            const completedSteps = document.querySelectorAll(".completed-step");
+            completedSteps.forEach(step => step.classList.remove("completed-step"));
+            logAction("Protocol continued with steps 2 and 4.");
+        }
+
+        function resolveAlert() {
+            alertResolved = true;
+            document.getElementById("steps-container").classList.add("locked");
+            logAction("Alert resolved", `Reason: ${document.getElementById("resolution-reason").value}`);
+        }
+    </script>
+</body>
+</html>
